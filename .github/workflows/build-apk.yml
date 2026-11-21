@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configurar Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -26,7 +26,10 @@ jobs:
           cache: true
 
       - name: Generar estructura Android
-        run: flutter create . --platforms=android --org com.pagobyte.app
+        run: flutter create . --platforms=android --org com.pagobyte.app --project-name pagobyte_clientes
+
+      - name: Descomprimir proyecto Pagobyte
+        run: unzip -o pagobyte-app-clientes-flutter_2.zip
 
       - name: Agregar permiso de Internet al Manifest
         run: |
