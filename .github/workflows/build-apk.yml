@@ -28,8 +28,10 @@ jobs:
       - name: Generar estructura Android
         run: flutter create . --platforms=android --org com.pagobyte.app --project-name pagobyte_clientes
 
-      - name: Descomprimir proyecto Pagobyte
-        run: unzip -o pagobyte-app-clientes-flutter_2.zip
+      - name: Descomprimir proyecto Pagobyte y corregir null-safety
+        run: |
+          unzip -o pagobyte-app-clientes-flutter_2.zip
+          sed -i 's/_openReportPaymentSheet(siguiente, rec, estado);/_openReportPaymentSheet(siguiente!, rec, estado);/' lib/screens/cuotas_tab.dart
 
       - name: Agregar permiso de Internet al Manifest
         run: |
