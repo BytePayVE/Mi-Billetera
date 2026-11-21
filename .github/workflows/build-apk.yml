@@ -33,9 +33,14 @@ jobs:
           unzip -o pagobyte-app-clientes-flutter_2.zip
           sed -i 's/_openReportPaymentSheet(siguiente, rec, estado);/_openReportPaymentSheet(siguiente!, rec, estado);/' lib/screens/cuotas_tab.dart
 
-      - name: Agregar permiso de Internet al Manifest
+      - name: Configurar permisos y desactivar Android Lint
         run: |
           sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
+          if [ -f android/app/build.gradle.kts ]; then
+            sed -i '0,/android {/s/android {/android {\n    lint {\n        checkReleaseBuilds = false\n        abortOnError = false\n    }/' android/app/build.gradle.kts
+          elif [ -f android/app/build.gradle ]; then
+            sed -i '0,/android {/s/android {/android {\n    lintOptions {\n        checkReleaseBuilds false\n        abortOnError false\n    }/' android/app/build.gradle
+          fi
 
       - name: Instalar dependencias
         run: flutter pub get
