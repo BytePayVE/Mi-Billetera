@@ -1,4 +1,4 @@
-name: Compilar APK Pagobyte
+name: Compilar Pagobyte (Android APK + iPhone Web)
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_apk:
+  build_all:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,31 +25,47 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Generar estructura Android
-        run: flutter create . --platforms=android --org com.pagobyte.app --project-name pagobyte_clientes
+      - name: Generar estructura Android y Web
+        run: flutter create . --platforms=android,web --org com.pagobyte.app --project-name pagobyte_clientes
 
-      - name: Descomprimir proyecto Pagobyte y corregir null-safety
-        run: |
-          unzip -o pagobyte-app-clientes-flutter_2.zip
-          sed -i 's/_openReportPaymentSheet(siguiente, rec, estado);/_openReportPaymentSheet(siguiente!, rec, estado);/' lib/screens/cuotas_tab.dart
+      - name: Descomprimir app-clientes.zip
+        run: unzip -o app-clientes.zip
 
-      - name: Configurar permisos y desactivar Android Lint
+      - name: Configurar permisos, Biometría, Desugaring y desactivar Lint
         run: |
-          sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
+          sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.CAMERA"\/>\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"\/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"\/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"\/>\n    <uses-permission android:name="android.permission.USE_BIOMETRIC"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
+          find android/app/src/main/kotlin -name "MainActivity.kt" -exec sed -i 's/import io.flutter.embedding.android.FlutterActivity/import io.flutter.embedding.android.FlutterFragmentActivity/' {} +
+          find android/app/src/main/kotlin -name "MainActivity.kt" -exec sed -i 's/: FlutterActivity()/: FlutterFragmentActivity()/' {} +
           if [ -f android/app/build.gradle.kts ]; then
             sed -i '0,/android {/s/android {/android {\n    lint {\n        checkReleaseBuilds = false\n        abortOnError = false\n    }/' android/app/build.gradle.kts
+            sed -i '0,/compileOptions {/s/compileOptions {/compileOptions {\n        isCoreLibraryDesugaringEnabled = true/' android/app/build.gradle.kts
+            printf '\ndependencies {\n    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n}\n' >> android/app/build.gradle.kts
           elif [ -f android/app/build.gradle ]; then
             sed -i '0,/android {/s/android {/android {\n    lintOptions {\n        checkReleaseBuilds false\n        abortOnError false\n    }/' android/app/build.gradle
+            sed -i '0,/compileOptions {/s/compileOptions {/compileOptions {\n        coreLibraryDesugaringEnabled true/' android/app/build.gradle
+            printf "\ndependencies {\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'\n}\n" >> android/app/build.gradle
           fi
 
-      - name: Instalar dependencias
-        run: flutter pub get
+      - name: Instalar dependencias, auditar paquetes y generar ícono
+        run: |
+          flutter pub get
+          dart pub outdated || true
+          dart run flutter_launcher_icons
 
-      - name: Compilar APK Release
-        run: flutter build apk --release
+      - name: Compilar APK Release optimizado (liviano)
+        run: flutter build apk --release --split-per-abi --tree-shake-icons
 
-      - name: Subir APK listo para descargar
+      - name: Compilar versión Web / iPhone PWA
+        run: flutter build web --release --base-href "/Mi-Billetera/"
+
+      - name: Subir APK Android optimizado
         uses: actions/upload-artifact@v4
         with:
-          name: pagobyte-clientes-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: pagobyte-android-apk
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+
+      - name: Subir paquete Web para iPhone (GitHub Pages)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pagobyte-iphone-web
+          path: build/web/
