@@ -28,11 +28,12 @@ jobs:
       - name: Generar estructura Android y Web
         run: flutter create . --platforms=android,web --org com.pagobyte.app --project-name pagobyte_clientes
 
-      - name: Descomprimir app-clientes.zip
-        run: unzip -o app-clientes.zip
+      - name: Descomprimir app-clientes-v2.zip
+        run: unzip -o app-clientes-v2.zip
 
-      - name: Configurar permisos, Biometría, Desugaring y desactivar Lint
+      - name: Configurar nombre Pagobyte, permisos, Biometría, Desugaring y Lint
         run: |
+          sed -i 's/android:label="[^"]*"/android:label="Pagobyte"/' android/app/src/main/AndroidManifest.xml
           sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.CAMERA"\/>\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"\/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"\/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"\/>\n    <uses-permission android:name="android.permission.USE_BIOMETRIC"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
           find android/app/src/main/kotlin -name "MainActivity.kt" -exec sed -i 's/import io.flutter.embedding.android.FlutterActivity/import io.flutter.embedding.android.FlutterFragmentActivity/' {} +
           find android/app/src/main/kotlin -name "MainActivity.kt" -exec sed -i 's/: FlutterActivity()/: FlutterFragmentActivity()/' {} +
