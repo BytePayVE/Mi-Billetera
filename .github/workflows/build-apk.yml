@@ -3,7 +3,13 @@ name: Compilar Pagobyte (Android APK + iPhone Web)
 on:
   push:
     branches: [ main, master ]
+    paths:
+      - 'Pagobyte.zip'
+      - '.github/workflows/build-apk.yml'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build_all:
@@ -25,13 +31,21 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Preparar carpeta temporal de compilación
+        run: |
+          mkdir -p _build_tmp
+          cp Pagobyte.zip _build_tmp/
+
       - name: Generar estructura Android y Web
+        working-directory: _build_tmp
         run: flutter create . --platforms=android,web --org com.pagobyte.app --project-name pagobyte
 
       - name: Descomprimir Pagobyte.zip
+        working-directory: _build_tmp
         run: unzip -o Pagobyte.zip
 
       - name: Configurar nombre Pagobyte, permisos, Biometría, Desugaring y Lint
+        working-directory: _build_tmp
         run: |
           sed -i 's/android:label="[^"]*"/android:label="Pagobyte"/' android/app/src/main/AndroidManifest.xml
           sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.CAMERA"\/>\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"\/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"\/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"\/>\n    <uses-permission android:name="android.permission.VIBRATE"\/>\n    <uses-permission android:name="android.permission.USE_BIOMETRIC"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
@@ -47,26 +61,35 @@ jobs:
             printf "\ndependencies {\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'\n}\n" >> android/app/build.gradle
           fi
 
-      - name: Instalar dependencias, auditar paquetes y generar ícono
+      - name: Instalar dependencias y generar ícono
+        working-directory: _build_tmp
         run: |
           flutter pub get
-          dart pub outdated || true
           dart run flutter_launcher_icons
 
       - name: Compilar APK Release optimizado (liviano)
+        working-directory: _build_tmp
         run: flutter build apk --release --split-per-abi --tree-shake-icons
 
-      - name: Compilar versión Web / iPhone PWA
-        run: flutter build web --release --base-href "/Mi-Billetera/"
+      - name: Compilar versión Web / iPhone PWA (con ruta /Mi-Billetera/app/)
+        working-directory: _build_tmp
+        run: flutter build web --release --base-href "/Mi-Billetera/app/"
 
-      - name: Subir APK Android optimizado
+      - name: Publicar carpeta app/ completa y pagobyte.apk en el repositorio
+        run: |
+          rm -rf app
+          mkdir -p app
+          cp -r _build_tmp/build/web/* app/
+          cp _build_tmp/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk pagobyte.apk
+          rm -rf _build_tmp
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app pagobyte.apk
+          git diff --cached --quiet || git commit -m "Publicar app iPhone completa y APK [skip ci]"
+          git push
+
+      - name: Subir APK Android como artefacto
         uses: actions/upload-artifact@v4
         with:
           name: pagobyte-android-apk
-          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-
-      - name: Subir paquete Web para iPhone (GitHub Pages)
-        uses: actions/upload-artifact@v4
-        with:
-          name: pagobyte-iphone-web
-          path: build/web/
+          path: pagobyte.apk
