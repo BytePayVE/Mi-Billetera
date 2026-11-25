@@ -450,3 +450,30 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .kpi-mini { background: #F4F7FC; border: 1px solid #DCE5F4; border-radius: 14px; padding: 14px; }
 .kpi-mini span { display: block; font-size: 0.78rem; color: #52627E; font-weight: 700; }
 .kpi-mini strong { font-size: 1.35rem; color: #1D4ED8; }
+
+/* Control exacto de stock y eliminación de productos */
+.stock-ctrl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.stock-ctrl input {
+  width: 86px;
+  min-height: 38px;
+  margin-top: 0;
+  padding: 6px 10px;
+  text-align: center;
+  font-weight: 700;
+}
+.stock-ctrl .boton {
+  margin-top: 0;
+  width: auto;
+  flex: 1;
+  min-width: 110px;
+  padding: 9px 12px;
+  font-size: .84rem;
+  }
