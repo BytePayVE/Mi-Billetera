@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.supabase.co https://ve.dolarapi.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.supabase.co https://api.qrserver.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;">
+  <title>Pagobyte – Consola Web y Tiendas Aliadas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Georama:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+  <link rel="stylesheet" href="admin.css?v=7">
+</head>
+<body>
+  <!-- Isotipo oficial de Pagobyte (4 bloques tecnológicos) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="iso" viewBox="0 0 48 48">
+      <rect x="3" y="3" width="19" height="19" rx="5" style="fill:var(--iso1)"/>
+      <rect x="26" y="3" width="19" height="19" rx="5" style="fill:var(--iso1)"/>
+      <rect x="3" y="26" width="19" height="19" rx="5" style="fill:var(--iso1)"/>
+      <rect x="28" y="28" width="17" height="17" rx="4" style="fill:var(--iso2)"/>
+    </symbol>
+  </svg>
+
+  
+  <!-- Splash animado de caída Pagobyte -->
+  <div id="pbSplash" class="pb-splash" aria-hidden="true">
+    <div class="pb-splash-box">
+      <div class="pb-splash-logo"><svg width="56" height="56"><use href="#iso"/></svg></div>
+      <div class="pb-splash-text">Pagobyte</div>
+      <div class="pb-splash-sub">Ecosistema Comercial &amp; Gestión</div>
+    </div>
+  </div>
+
+  <!-- PANTALLA DE ACCESO: DOS LOGINS SEPARADOS -->
+  <main id="login" class="login">
+    <div class="login-wrap">
+      <div class="login-brand">
+        <svg class="iso iso-g" aria-hidden="true"><use href="#iso"/></svg>
+        <div>
+          <h1 class="wm"><b>Pago</b><span>byte</span></h1>
+          <p class="lema">Plataforma tecnológica de gestión de cuotas y comercios aliados.</p>
+        </div>
+      </div>
+
+      <div class="portal-tabs" role="tablist">
+        <button type="button" id="tabOrg" class="portal-tab activo" data-portal="org">Organización</button>
+        <button type="button" id="tabTienda" class="portal-tab" data-portal="tienda">Tiendas Aliadas</button>
+      </div>
+
+      <!-- LOGIN 1: ORGANIZACIÓN CENTRAL -->
+      <form id="formLogin" class="login-caja">
+        <span class="etq-chip">Administración Central</span>
+        <h2>Ingreso de la Organización</h2>
+        <p class="sub">Acceso exclusivo para verificación de pagos, clientes, entrevistas a tiendas y exportación de contratos.</p>
+        <label for="email">Correo administrativo</label>
+        <input id="email" type="email" autocomplete="username" placeholder="admin@pagobyte.com" required>
+        <label for="clave">Contraseña</label>
+        <input id="clave" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        <p id="loginError" class="error" role="alert"></p>
+        <button type="submit" class="boton">Entrar a la Organización</button>
+        <button type="button" id="btnOlvideOrg" class="enlace" style="width:100%;margin-top:8px;">¿Olvidaste tu contraseña?</button>
+      </form>
+
+      <!-- LOGIN 2: TIENDAS ALIADAS (ACCESO + SOLICITUD DE AFILIACIÓN) -->
+      <div id="cajaTienda" class="login-caja" hidden>
+        <span class="etq-chip amber">Comercios Aliados</span>
+        <h2>Portal de Tiendas Aliadas</h2>
+        <p class="sub">Ingresa con tu código numérico asignado tras la entrevista o envía una solicitud de afiliación.</p>
+
+        <div class="sub-tabs">
+          <button type="button" id="subTiendaEntrar" class="activo">Iniciar sesión</button>
+          <button type="button" id="subTiendaCrear">Solicitar afiliación</button>
+        </div>
+
+        <form id="formTiendaLogin">
+          <label for="tCodigo">Código numérico de tienda</label>
+          <input id="tCodigo" type="text" inputmode="numeric" pattern="^[0-9]{6,15}$" placeholder="Ej: 804918273" required>
+          <label for="tClave">Contraseña</label>
+          <input id="tClave" type="password" placeholder="••••••••" required>
+          <p id="tiendaError" class="error" role="alert"></p>
+          <button type="submit" class="boton">Entrar como Tienda</button>
+          <p class="nota" style="text-align:center;margin-top:10px;">¿Olvidaste tu clave? Solicita un restablecimiento directo al equipo de Pagobyte.</p>
+        </form>
+
+        <form id="formTiendaRegistro" hidden>
+          <label for="trNombre">Nombre comercial de la tienda</label>
+          <input id="trNombre" type="text" placeholder="Ej: Virtual Tecnología C.A." required>
+
+          <div class="dos-col">
+            <div>
+              <label for="trRif">RIF Fiscal</label>
+              <input id="trRif" type="text" placeholder="J-41234567-8" required>
+            </div>
+            <div>
+              <label for="trRep">Representante legal</label>
+              <input id="trRep" type="text" placeholder="Nombre y apellido" required>
+            </div>
+          </div>
+
+          <div class="dos-col">
+            <div>
+              <label for="trCorreo">Correo corporativo</label>
+              <input id="trCorreo" type="email" placeholder="contacto@tienda.com" required>
+            </div>
+            <div>
+              <label for="trTelContacto">WhatsApp / Teléfono</label>
+              <input id="trTelContacto" type="tel" placeholder="04141234567" required>
+            </div>
+          </div>
+
+          <label for="trDireccion">Ciudad y dirección física del local</label>
+          <input id="trDireccion" type="text" placeholder="Ej: El Tocuyo, Estado Lara..." required>
+
+          <label for="trCategoria">Rubro o productos que comercializa</label>
+          <input id="trCategoria" type="text" placeholder="Ej: Tecnología, accesorios, textiles..." required>
+
+          <div class="dos-col">
+            <div>
+              <label for="trBanco">Banco Pago Móvil</label>
+              <select id="trBanco" required>
+                <option value="0102 - Banco de Venezuela">0102 - Venezuela</option>
+                <option value="0108 - BBVA Provincial">0108 - Provincial</option>
+                <option value="0134 - Banesco">0134 - Banesco</option>
+                <option value="0105 - Mercantil">0105 - Mercantil</option>
+                <option value="0172 - Bancamiga">0172 - Bancamiga</option>
+              </select>
+            </div>
+            <div>
+              <label for="trTel">Teléfono Pago Móvil</label>
+              <input id="trTel" type="tel" placeholder="04141234567" required>
+            </div>
+          </div>
+
+          <p class="nota">Tu solicitud será evaluada por el equipo de Pagobyte. Te contactaremos para coordinar la entrevista y validar requisitos antes de activar tu cuenta.</p>
+          <p id="tiendaRegError" class="error" role="alert"></p>
+          <button type="submit" class="boton">Enviar solicitud de afiliación</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- PANEL 1: CONSOLA EXCLUSIVA DE LA ORGANIZACIÓN PAGOBYTE -->
+  <div id="panel" class="panel" hidden>
+    <header class="barra">
+      <span class="logo">
+        <svg class="iso iso-c" aria-hidden="true"><use href="#iso"/></svg>
+        <span class="wm"><b>Pago</b><span>byte</span></span>
+      </span>
+      <div class="bcv-live" id="bcvWidget">
+        <span class="bcv-dot"></span>
+        <span id="bcvTexto" class="mono">BCV: --</span>
+        <button id="btnSyncBcv" type="button" class="mini-btn" title="Sincronizar tasa oficial del BCV">↻ API</button>
+      </div>
+      <span id="usuario" class="usuario"></span>
+      <button id="salir" class="enlace" type="button">Salir</button>
+    </header>
+
+    <nav id="menu" class="menu">
+      <button type="button" data-vista="resumen" class="activo">Resumen</button>
+      <button type="button" data-vista="solicitudes" data-tooltip="Revisar solicitudes pendientes">Solicitudes <span id="bdgSol" class="pb-badge-count" hidden>0</span></button>
+      <button type="button" data-vista="clientes">Clientes</button>
+      <button type="button" data-vista="asignar">Asignar</button>
+      <button type="button" data-vista="pagos" data-tooltip="Auditar comprobantes reportados">Pagos <span id="bdgPag" class="pb-badge-count" hidden>0</span></button>
+      <button type="button" data-vista="compras">Compras y Contratos</button>
+      <button type="button" data-vista="cuotas">Cuotas</button>
+      <button type="button" data-vista="productos">Productos</button>
+      <button type="button" data-vista="tiendas">Tiendas Aliadas</button>
+      <button type="button" data-vista="notificaciones">Notificaciones</button>
+      <button type="button" data-vista="actividad">Actividad</button>
+    </nav>
+
+    <section id="vista" class="vista"></section>
+  </div>
+
+  <!-- PANEL 2: PORTAL AISLADO DE TIENDAS ALIADAS -->
+  <div id="panelTienda" class="panel" hidden>
+    <header class="barra">
+      <span class="logo">
+        <svg class="iso iso-c" aria-hidden="true"><use href="#iso"/></svg>
+        <span class="wm"><b>Pago</b><span>byte</span></span>
+        <span class="etq-chip amber">Tienda Aliada</span>
+      </span>
+      <span id="tiendaNombreBar" class="usuario"></span>
+      <button id="salirTienda" class="enlace" type="button">Salir</button>
+    </header>
+    <section id="vistaTienda" class="vista" style="grid-column: 1 / -1;"></section>
+  </div>
+
+  <div id="hoja" class="hoja" hidden>
+    <div class="fondo" data-cerrar></div>
+    <div class="panelhoja">
+      <button class="cerrar" data-cerrar type="button">Cerrar</button>
+      <div id="hojaCont"></div>
+    </div>
+  </div>
+  <p id="aviso" class="aviso" role="status" hidden></p>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="admin.js?v=10"></script>
+</body>
+</html>
