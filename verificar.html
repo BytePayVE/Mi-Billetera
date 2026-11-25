@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Verificar Solvencia Digital — Pagobyte</title>
+  <meta name="description" content="Valida en tiempo real la autenticidad de un Certificado de Solvencia Digital emitido por Pagobyte.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Georama:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand" aria-label="Pagobyte Inicio">
+        <svg class="brand-mark" width="32" height="32" viewBox="0 0 48 48" aria-hidden="true">
+          <rect x="3" y="3" width="19" height="19" rx="5" fill="#10203A"/>
+          <rect x="26" y="3" width="19" height="19" rx="5" fill="#10203A"/>
+          <rect x="3" y="26" width="19" height="19" rx="5" fill="#10203A"/>
+          <rect x="28" y="28" width="17" height="17" rx="4" fill="#2563EB"/>
+        </svg>
+        <span class="brand-name">Pagobyte</span>
+      </a>
+
+      <nav class="site-nav" id="siteNav" aria-label="Navegación principal">
+          <a href="index.html" class="nav-link">Inicio</a>
+          <a href="servicios.html" class="nav-link">Servicios</a>
+          <a href="tiendas.html" class="nav-link">Tiendas</a>
+          <a href="verificar.html" class="nav-link active" aria-current="page">Verificar Solvencia</a>
+          <a href="nosotros.html" class="nav-link">Nosotros</a>
+          <a href="ayuda.html" class="nav-link">Ayuda</a>
+      </nav>
+
+      <div class="header-actions">
+        <button type="button" class="btn btn-primary btn-sm" data-open-modal="downloadModal">Descargar app</button>
+        <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="siteNav">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="7" x2="21" y2="7"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="17" x2="21" y2="17"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <h1>Verificador de Solvencia Digital</h1>
+        <p class="page-lead">
+          Confirma en segundos si un Certificado de Solvencia Digital emitido por Pagobyte es auténtico y corresponde a una obligación pagada al 100%.
+        </p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container verify-wrap">
+        <div class="verify-card">
+          <h2>Consultar código de verificación</h2>
+          <p class="form-lead">Ingresa el código impreso en el certificado PDF (formato <strong>PB-SOLV-XXXXXXXX</strong>).</p>
+
+          <form id="verifyForm" class="verify-form" novalidate>
+            <input id="verifyCodeInput" type="text" required placeholder="Ej. PB-SOLV-A1B2C3D4" autocomplete="off">
+            <button type="submit" class="btn btn-primary" id="verifySubmitBtn">Verificar</button>
+          </form>
+
+          <div id="verifyResult" class="verify-result" hidden aria-live="polite"></div>
+        </div>
+
+        <div class="verify-info-box">
+          <h3>¿Cómo funciona esta validación?</h3>
+          <ul>
+            <li>Cada compra saldada al 100% en Pagobyte genera un código único verificable en tiempo real.</li>
+            <li>Por privacidad, solo mostramos el nombre del titular, la cédula parcialmente oculta, el producto saldado y el monto total cancelado.</li>
+            <li>Si el código no aparece como <strong>SOLVENTE (100% VERIFICADO)</strong>, el documento no tiene validez ante comercios aliados.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="brand">
+          <svg class="brand-mark" width="28" height="28" viewBox="0 0 48 48" aria-hidden="true">
+            <rect x="3" y="3" width="19" height="19" rx="5" fill="#FFFFFF"/>
+            <rect x="26" y="3" width="19" height="19" rx="5" fill="#FFFFFF"/>
+            <rect x="3" y="26" width="19" height="19" rx="5" fill="#FFFFFF"/>
+            <rect x="28" y="28" width="17" height="17" rx="4" fill="#38A3F1"/>
+          </svg>
+          <span class="brand-name light">Pagobyte</span>
+        </a>
+        <p class="footer-desc">
+          Plataforma tecnológica que conecta a clientes y comercios aliados para gestionar compras en cuotas sin intereses desde $5, con validación de identidad y compromisos claros.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <a href="index.html">Inicio</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="tiendas.html">Dónde usar Pagobyte</a>
+        <a href="verificar.html">Verificar Solvencia</a>
+        <a href="nosotros.html">Nosotros</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Aplicación</h4>
+        <button type="button" class="footer-link-btn" data-open-modal="downloadModal">Descargar para Android</button>
+        <button type="button" class="footer-link-btn" data-open-modal="iphoneModal">Usar en iPhone</button>
+        <a href="ayuda.html#afiliar-comercio">Afiliar un comercio</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Legal y Soporte</h4>
+        <a href="terminos.html">Términos y Condiciones</a>
+        <a href="privacidad.html">Política de Privacidad</a>
+        <a href="ayuda.html#contacto">Centro de ayuda</a>
+        <span class="footer-note">Lunes a sábado, 8:00 AM – 6:00 PM</span>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <p>&copy; <span id="currentYear">2026</span> Pagobyte. Plataforma de software para gestión comercial.</p>
+      <p class="footer-legal-note">Pagobyte no es una entidad bancaria ni pasarela de pagos; cada comercio aliado administra su catálogo y recibe sus pagos directamente.</p>
+    </div>
+  </footer>
+
+  <!-- Modal Descarga Android / iPhone -->
+  <div class="modal-backdrop" id="downloadModal" hidden role="dialog" aria-modal="true" aria-labelledby="downloadModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="downloadModalTitle">Obtén la app de Pagobyte</h3>
+        <button type="button" class="modal-close" data-close-modal aria-label="Cerrar ventana">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p class="modal-lead">Elige tu dispositivo para instalar la aplicación oficial y gestionar tus compras en cuotas desde $5.</p>
+
+      <div class="store-options">
+        <a href="./pagobyte.apk" class="store-option" id="apkDownloadBtn">
+          <div class="store-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 16V9a7 7 0 0 1 14 0v7"/><path d="M3 16h18"/><path d="M8 3l1.5 2.5"/><path d="M16 3l-1.5 2.5"/><circle cx="9.5" cy="10.5" r="0.8" fill="currentColor"/><circle cx="14.5" cy="10.5" r="0.8" fill="currentColor"/></svg>
+          </div>
+          <div class="store-copy">
+            <strong>Android (APK oficial)</strong>
+            <span>Instalación directa, liviana y lista para usar.</span>
+          </div>
+          <svg class="store-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+
+        <button type="button" class="store-option" data-switch-modal="iphoneModal">
+          <div class="store-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="3"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <div class="store-copy">
+            <strong>iPhone / iOS (Web App)</strong>
+            <span>Agrégala desde Safari a tu pantalla de inicio sin ocupar espacio.</span>
+          </div>
+          <svg class="store-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Instrucciones iPhone -->
+  <div class="modal-backdrop" id="iphoneModal" hidden role="dialog" aria-modal="true" aria-labelledby="iphoneModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="iphoneModalTitle">Instalar Pagobyte en iPhone</h3>
+        <button type="button" class="modal-close" data-close-modal aria-label="Cerrar ventana">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p class="modal-lead">Puedes usar la aplicación completa en tu iPhone en menos de 30 segundos:</p>
+      <ol class="step-list">
+        <li>Abre el enlace de la app web de Pagobyte desde <strong>Safari</strong>.</li>
+        <li>Toca el botón <strong>Compartir</strong> en la barra inferior de Safari.</li>
+        <li>Selecciona <strong>"Agregar a pantalla de inicio"</strong> y pulsa <strong>Agregar</strong>.</li>
+      </ol>
+      <div class="modal-actions">
+        <a href="./app/" class="btn btn-primary" id="iphoneWebBtn" style="width:100%; justify-content:center;">Abrir versión web para iPhone</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
