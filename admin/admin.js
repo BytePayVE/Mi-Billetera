@@ -704,7 +704,7 @@ async function cargarVistaTienda(tab) {
 
   if (tab === 'catalogo' && tiendaRol === 'dueno') {
     const { data: prods, error } = await sb.from('productos')
-      .select('id, nombre, categoria, precio_usd, stock, max_cuotas, imagen_url')
+      .select('id, nombre, categoria, precio_usd, stock, activo, max_cuotas, imagen_url')
       .eq('tienda_id', tiendaActual.id).order('nombre');
     if (error) { box.innerHTML = falla(error); return; }
     box.innerHTML = `<form id="formProdTienda" class="tarjeta">
@@ -723,16 +723,26 @@ async function cargarVistaTienda(tab) {
       <p id="tpErr" class="error"></p>
       <button type="submit" id="tpBtn" class="boton">Guardar producto en mi tienda</button>
     </form>
-    ${(prods || []).length ? prods.map((p) => `<article class="tarjeta">
+    ${(prods || []).length ? prods.map((p) => {
+      const agotado = Number(p.stock || 0) <= 0 || p.activo === false;
+      const badgeCls = agotado ? 'mal' : p.stock <= 5 ? 'alerta' : 'ok';
+      const badgeTxt = agotado ? 'Agotado / Oculto' : p.stock <= 5 ? 'Stock bajo' : 'Disponible';
+      return `<article class="tarjeta">
       <div class="fila" style="align-items:center;gap:12px;">
         ${p.imagen_url ? `<img class="prod-thumb" src="${esc(p.imagen_url)}" alt="${esc(p.nombre)}">` : ''}
         <div style="flex:1;">
           <strong>${esc(p.nombre)}</strong>
-          <p class="detalle" style="margin:2px 0;">${esc(p.categoria || 'General')} • Stock: ${p.stock}</p>
+          <p class="detalle" style="margin:2px 0;">${esc(p.categoria || 'General')} • Stock: ${p.stock} <span class="insignia ${badgeCls}">${badgeTxt}</span></p>
         </div>
         <span class="monto">${usd(p.precio_usd)}</span>
       </div>
-    </article>`).join('') : vacio('Aún no has publicado productos propios en tu catálogo.')}`;
+      <div class="stock-ctrl">
+        <input type="number" min="0" id="stk-t-${p.id}" value="${p.stock ?? 0}" aria-label="Stock exacto">
+        <button type="button" class="boton" data-guardar-stock="${p.id}" data-origen="tienda">Guardar stock</button>
+        <button type="button" class="boton alerta" data-eliminar-prod="${p.id}" data-pnom="${esc(p.nombre)}" data-origen="tienda">Eliminar</button>
+      </div>
+    </article>`;
+    }).join('') : vacio('Aún no has publicado productos propios en tu catálogo.')}`;
 
     $('formProdTienda').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1155,7 +1165,11 @@ async function vProductos() {
   </form>`;
 
   const listHtml = (prodsRes.data || []).length
-    ? prodsRes.data.map((p) => `<article class="tarjeta">
+    ? prodsRes.data.map((p) => {
+      const agotado = Number(p.stock || 0) <= 0 || p.activo === false;
+      const badgeCls = agotado ? 'mal' : p.stock <= 5 ? 'alerta' : 'ok';
+      const badgeTxt = agotado ? 'Agotado / Oculto' : p.stock <= 5 ? 'Stock bajo' : 'Disponible';
+      return `<article class="tarjeta">
       <div class="fila" style="align-items:center;gap:12px;">
         ${p.imagen_url ? `<img class="prod-thumb" src="${esc(p.imagen_url)}" alt="${esc(p.nombre)}">` : ''}
         <div style="flex:1;">
@@ -1164,8 +1178,14 @@ async function vProductos() {
         </div>
         <span class="monto">${usd(p.precio_usd)}</span>
       </div>
-      <p class="nota">Stock: ${p.stock} • Hasta ${p.max_cuotas} cuotas <span class="insignia ${p.stock <= 5 ? 'alerta' : 'ok'}">${p.stock <= 5 ? 'Stock bajo' : 'Disponible'}</span></p>
-    </article>`).join('')
+      <p class="nota">Stock: ${p.stock} • Hasta ${p.max_cuotas} cuotas <span class="insignia ${badgeCls}">${badgeTxt}</span></p>
+      <div class="stock-ctrl">
+        <input type="number" min="0" id="stk-o-${p.id}" value="${p.stock ?? 0}" aria-label="Stock exacto">
+        <button type="button" class="boton" data-guardar-stock="${p.id}" data-origen="org">Guardar stock</button>
+        <button type="button" class="boton alerta" data-eliminar-prod="${p.id}" data-pnom="${esc(p.nombre)}" data-origen="org">Eliminar</button>
+      </div>
+    </article>`;
+    }).join('')
     : vacio('Todavía no hay productos.');
 
   return formHtml + listHtml;
@@ -1355,13 +1375,78 @@ async function llamar(fn, args, ok, recargar) {
 }
 
 document.addEventListener('click', async (e) => {
-  const t = e.target.closest('[data-cerrar],[data-asignar],[data-asignarcli],[data-fase],[data-rechazar],[data-pago],[data-cancelar],[data-word],[data-pdf],[data-entrevista],[data-aprobartienda],[data-rechazartienda],[data-resettienda],[data-kyc],[data-tvista],[data-entregar],[data-togglecaj],[data-acuerdo],[data-abono],[data-comision],[data-toggletienda]');
+  const t = e.target.closest('[data-cerrar],[data-asignar],[data-asignarcli],[data-fase],[data-rechazar],[data-pago],[data-cancelar],[data-word],[data-pdf],[data-entrevista],[data-aprobartienda],[data-rechazartienda],[data-resettienda],[data-kyc],[data-tvista],[data-entregar],[data-togglecaj],[data-acuerdo],[data-abono],[data-comision],[data-toggletienda],[data-guardar-stock],[data-eliminar-prod]');
   if (!t) return;
   if (t.dataset.cerrar !== undefined) return cerrar();
   if (t.dataset.word) return ExportService.exportarContratoWord(t.dataset.word);
   if (t.dataset.pdf) return ExportService.exportarContratoPdf(t.dataset.pdf);
 
   
+
+  if (t.dataset.guardarStock) {
+    const id = t.dataset.guardarStock;
+    const esTienda = t.dataset.origen === 'tienda';
+    const inp = $(esTienda ? `stk-t-${id}` : `stk-o-${id}`);
+    const nuevoStock = parseInt(inp?.value, 10);
+    if (isNaN(nuevoStock) || nuevoStock < 0) {
+      return aviso('Ingresa un número válido de stock (0 o mayor).', 'alerta');
+    }
+    t.disabled = true;
+    let q = sb.from('productos').update({ stock: nuevoStock, activo: nuevoStock > 0 }).eq('id', id);
+    if (esTienda && tiendaActual?.id) q = q.eq('tienda_id', tiendaActual.id);
+    const { error } = await q;
+    t.disabled = false;
+    if (error) return alert('No se pudo actualizar el stock: ' + error.message);
+    await registrarAuditoria(
+      esTienda ? 'tienda' : 'organizacion',
+      esTienda ? (tiendaActual?.nombre_comercial || 'Tienda') : 'Administración',
+      'Actualizó stock exacto',
+      `Producto ${id.slice(0, 8)} → ${nuevoStock} uds.`
+    );
+    aviso(nuevoStock === 0 ? 'Stock en 0 (producto marcado como agotado).' : `Stock actualizado a ${nuevoStock} unidades.`);
+    return esTienda ? cargarVistaTienda('catalogo') : cargar('productos');
+  }
+
+  if (t.dataset.eliminarProd) {
+    const id = t.dataset.eliminarProd;
+    const nom = t.dataset.pnom || 'este producto';
+    const esTienda = t.dataset.origen === 'tienda';
+    if (!confirm(`¿Seguro que deseas eliminar "${nom}" del catálogo? Esta acción no se puede deshacer.`)) return;
+    t.disabled = true;
+    let q = sb.from('productos').delete().eq('id', id);
+    if (esTienda && tiendaActual?.id) q = q.eq('tienda_id', tiendaActual.id);
+    const { error } = await q;
+    t.disabled = false;
+    if (error) {
+      if (error.code === '23503') {
+        const ocultar = confirm(`"${nom}" ya tiene compras o solicitudes registradas y no se puede borrar del historial.\n\n¿Deseas poner su stock en 0 y ocultarlo del catálogo?`);
+        if (ocultar) {
+          let qOff = sb.from('productos').update({ stock: 0, activo: false }).eq('id', id);
+          if (esTienda && tiendaActual?.id) qOff = qOff.eq('tienda_id', tiendaActual.id);
+          const { error: errOff } = await qOff;
+          if (errOff) return alert('No se pudo desactivar: ' + errOff.message);
+          await registrarAuditoria(
+            esTienda ? 'tienda' : 'organizacion',
+            esTienda ? (tiendaActual?.nombre_comercial || 'Tienda') : 'Administración',
+            'Ocultó producto con historial',
+            nom
+          );
+          aviso('Producto marcado como agotado y oculto.');
+          return esTienda ? cargarVistaTienda('catalogo') : cargar('productos');
+        }
+        return;
+      }
+      return alert('No se pudo eliminar el producto: ' + error.message);
+    }
+    await registrarAuditoria(
+      esTienda ? 'tienda' : 'organizacion',
+      esTienda ? (tiendaActual?.nombre_comercial || 'Tienda') : 'Administración',
+      'Eliminó producto',
+      nom
+    );
+    aviso('Producto eliminado correctamente.');
+    return esTienda ? cargarVistaTienda('catalogo') : cargar('productos');
+  }
 
   if (t.dataset.abono) {
     const rest = parseFloat(t.dataset.restante || '0');
